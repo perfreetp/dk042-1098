@@ -5,8 +5,27 @@ import { useRouter } from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { formatMoney, getConditionLabel, getStatusText } from '@/utils';
+import { TimelineEvent } from '@/types';
 import EmptyState from '@/components/EmptyState';
 import styles from './index.module.scss';
+
+const timelineIconMap: Record<TimelineEvent['type'], string> = {
+  created: '📋',
+  accepted: '🤝',
+  photo: '📸',
+  settled: '💰',
+  rejected: '❌',
+  handover: '交接'
+};
+
+const timelineColorMap: Record<TimelineEvent['type'], string> = {
+  created: '#3b82f6',
+  accepted: '#8b5cf6',
+  photo: '#f59e0b',
+  settled: '#22c55e',
+  rejected: '#ef4444',
+  handover: '#06b6d4'
+};
 
 const OrderDetailPage: React.FC = () => {
   const router = useRouter();
@@ -17,10 +36,7 @@ const OrderDetailPage: React.FC = () => {
 
   const handlePreviewImage = (current: string) => {
     if (!order?.images) return;
-    Taro.previewImage({
-      current,
-      urls: order.images
-    });
+    Taro.previewImage({ current, urls: order.images });
   };
 
   if (!order) {
@@ -30,6 +46,32 @@ const OrderDetailPage: React.FC = () => {
       </View>
     );
   }
+
+  const timeline: TimelineEvent[] = order.timeline || [
+    { type: 'created', label: '预约提交', time: order.createdAt, detail: order.pickupType === 'door' ? `上门回收 · ${order.address}` : `定点交书 · ${order.spotName}` }
+  ];
+
+  if (order.handoverNo && !timeline.find(e => e.type === 'handover')) {
+    timeline.push({
+      type: 'handover',
+      label: '批量交接',
+      time: order.createdAt,
+      detail: `交接编号：${order.handoverNo}${order.className ? ` · ${order.className}` : ''}`
+    });
+  }
+
+  if (order.status === 'recycled' && !timeline.find(e => e.type === 'accepted')) {
+    timeline.splice(1, 0, { type: 'accepted', label: '回收员接单', time: order.recycledAt || order.createdAt, detail: order.collectorName ? `回收员：${order.collectorName}` : '已分配回收员' });
+  }
+
+  if (order.status === 'rejected' && !timeline.find(e => e.type === 'accepted')) {
+    timeline.splice(1, 0, { type: 'accepted', label: '回收员接单', time: order.rejectedAt || order.createdAt, detail: order.collectorName ? `回收员：${order.collectorName}` : '已分配回收员' });
+  }
+
+  timeline.sort((a, b) => {
+    const order_map: Record<string, number> = { created: 0, handover: 1, accepted: 2, photo: 3, settled: 4, rejected: 4 };
+    return (order_map[a.type] || 0) - (order_map[b.type] || 0);
+  });
 
   return (
     <View className={styles.page}>
@@ -46,6 +88,33 @@ const OrderDetailPage: React.FC = () => {
           {order.status === 'recycled' && `回收完成，款项已到账 · ${order.recycledAt}`}
           {order.status === 'rejected' && '订单已被驳回，详见下方原因'}
         </Text>
+      </View>
+
+      <View className={styles.infoCard}>
+        <Text className={styles.cardTitle}>处理时间线</Text>
+        <View className={styles.timeline}>
+          {timeline.map((event, idx) => (
+            <View className={styles.timelineItem} key={idx}>
+              <View className={styles.timelineLeft}>
+                <View className={styles.timelineDot} style={{ background: timelineColorMap[event.type] }}>
+                  {event.type === 'handover' ? (
+                    <Text className={styles.timelineDotText}>交</Text>
+                  ) : (
+                    <Text className={styles.timelineDotText}>{timelineIconMap[event.type]}</Text>
+                  )}
+                </View>
+                {idx < timeline.length - 1 && <View className={styles.timelineLine} />}
+              </View>
+              <View className={styles.timelineContent}>
+                <View className={styles.timelineHeader}>
+                  <Text className={styles.timelineLabel}>{event.label}</Text>
+                  <Text className={styles.timelineTime}>{event.time}</Text>
+                </View>
+                {event.detail && <Text className={styles.timelineDetail}>{event.detail}</Text>}
+              </View>
+            </View>
+          ))}
+        </View>
       </View>
 
       <View className={styles.infoCard}>

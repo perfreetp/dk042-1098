@@ -200,11 +200,18 @@
   box-shadow: $shadow-card;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .recordLeft {
   flex: 1;
+}
+
+.recordRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $spacing-xs;
 }
 
 .recordAmount {
@@ -218,6 +225,13 @@
 .recordMeta {
   font-size: $font-size-sm;
   color: $color-text-tertiary;
+}
+
+.recordFailReason {
+  font-size: $font-size-xs;
+  color: $color-error;
+  display: block;
+  margin-top: $spacing-xs;
 }
 
 .recordStatus {
@@ -234,5 +248,30 @@
   &.pending {
     background: #fef3c7;
     color: $color-warning;
+  }
+
+  &.failed {
+    background: #fee2e2;
+    color: $color-error;
+  }
+}
+
+.recordActions {
+  display: flex;
+  gap: $spacing-xs;
+  margin-top: $spacing-xs;
+}
+
+.simulateBtn {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  padding: 4rpx 12rpx;
+  border: 1rpx solid $color-primary;
+  border-radius: $radius-xs;
+  background: transparent;
+
+  &.failBtn {
+    color: $color-error;
+    border-color: $color-error;
   }
 }

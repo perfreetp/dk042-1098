@@ -10,7 +10,7 @@ import styles from './index.module.scss';
 type AccountType = 'wechat' | 'alipay' | 'bank';
 
 const WithdrawPage: React.FC = () => {
-  const { user, withdrawRecords, updateUserBalance, addWithdrawRecord } = useAppStore();
+  const { user, withdrawRecords, updateUserBalance, addWithdrawRecord, addWalletEntry, failWithdrawRecord } = useAppStore();
   const [amount, setAmount] = useState<string>('');
   const [accountType, setAccountType] = useState<AccountType>('wechat');
   const [accountNo, setAccountNo] = useState('');
@@ -48,6 +48,7 @@ const WithdrawPage: React.FC = () => {
   const canSubmit = amountNum > 0 && amountNum <= availableBalance && accountNo.trim() && accountName.trim() && !isSubmitting;
 
   const handleQuickAmount = (val: string) => {
+    if (isSubmitting) return;
     if (val === 'all') {
       setAmount(String(availableBalance));
     } else {
@@ -76,8 +77,6 @@ const WithdrawPage: React.FC = () => {
         if (res.confirm) {
           setIsSubmitting(true);
 
-          console.log('[Withdraw] 申请提现:', amountNum, '账户类型:', accountType);
-
           updateUserBalance(amountNum, 'freeze');
 
           const newRecord: WithdrawRecord = {
@@ -91,6 +90,17 @@ const WithdrawPage: React.FC = () => {
 
           addWithdrawRecord(newRecord);
 
+          addWalletEntry({
+            id: 'we' + Date.now(),
+            type: 'withdraw_freeze',
+            amount: -amountNum,
+            title: '提现冻结',
+            time: new Date().toLocaleString(),
+            relatedId: newRecord.id,
+            relatedType: 'withdraw',
+            detail: `提现至${newRecord.account}`
+          });
+
           Taro.showToast({ title: '申请已提交', icon: 'success' });
 
           setTimeout(() => {
@@ -102,6 +112,48 @@ const WithdrawPage: React.FC = () => {
         }
       }
     });
+  };
+
+  const handleSimulateFail = (recordId: string) => {
+    Taro.showModal({
+      title: '模拟提现失败',
+      content: '确定将此提现标记为失败？冻结金额将退回可提现余额。',
+      success: (res) => {
+        if (res.confirm) {
+          failWithdrawRecord(recordId, '账户信息不符，请核实后重新申请');
+          Taro.showToast({ title: '已退回余额', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const handleSimulateSuccess = (recordId: string) => {
+    const store = useAppStore.getState();
+    const record = store.withdrawRecords.find(r => r.id === recordId);
+    if (!record || record.status !== 'pending') return;
+
+    useAppStore.setState((state) => ({
+      withdrawRecords: state.withdrawRecords.map(r =>
+        r.id === recordId ? { ...r, status: 'success' as const } : r
+      ),
+      user: {
+        ...state.user,
+        frozenBalance: Number(((state.user.frozenBalance || 0) - record.amount).toFixed(2))
+      }
+    }));
+
+    addWalletEntry({
+      id: 'we' + Date.now(),
+      type: 'withdraw_success',
+      amount: record.amount,
+      title: '提现成功',
+      time: new Date().toLocaleString(),
+      relatedId: recordId,
+      relatedType: 'withdraw',
+      detail: `${record.account}到账`
+    });
+
+    Taro.showToast({ title: '提现成功', icon: 'success' });
   };
 
   const accountOptions = [
@@ -140,27 +192,18 @@ const WithdrawPage: React.FC = () => {
             />
           </View>
           <View className={styles.quickAmounts}>
-            <View
-              className={styles.quickBtn}
-              onClick={() => !isSubmitting && handleQuickAmount('50')}
-            >
+            <View className={styles.quickBtn} onClick={() => handleQuickAmount('50')}>
               <Text>¥50</Text>
             </View>
-            <View
-              className={styles.quickBtn}
-              onClick={() => !isSubmitting && handleQuickAmount('100')}
-            >
+            <View className={styles.quickBtn} onClick={() => handleQuickAmount('100')}>
               <Text>¥100</Text>
             </View>
-            <View
-              className={styles.quickBtn}
-              onClick={() => !isSubmitting && handleQuickAmount('200')}
-            >
+            <View className={styles.quickBtn} onClick={() => handleQuickAmount('200')}>
               <Text>¥200</Text>
             </View>
             <View
               className={classnames(styles.quickBtn, styles.allBtn)}
-              onClick={() => !isSubmitting && handleQuickAmount('all')}
+              onClick={() => handleQuickAmount('all')}
             >
               <Text>全部</Text>
             </View>
@@ -229,16 +272,28 @@ const WithdrawPage: React.FC = () => {
                 <Text className={styles.recordMeta}>
                   {record.account} · {record.createdAt}
                 </Text>
-              </View>
-              <Text
-                className={classnames(
-                  styles.recordStatus,
-                  record.status === 'success' && styles.success,
-                  record.status === 'pending' && styles.pending
+                {record.failReason && (
+                  <Text className={styles.recordFailReason}>失败原因：{record.failReason}</Text>
                 )}
-              >
-                {record.status === 'success' ? '已到账' : record.status === 'pending' ? '处理中' : '失败'}
-              </Text>
+              </View>
+              <View className={styles.recordRight}>
+                <Text
+                  className={classnames(
+                    styles.recordStatus,
+                    record.status === 'success' && styles.success,
+                    record.status === 'pending' && styles.pending,
+                    record.status === 'failed' && styles.failed
+                  )}
+                >
+                  {record.status === 'success' ? '已到账' : record.status === 'pending' ? '处理中' : '已失败'}
+                </Text>
+                {record.status === 'pending' && (
+                  <View className={styles.recordActions}>
+                    <Text className={styles.simulateBtn} onClick={() => handleSimulateSuccess(record.id)}>模拟成功</Text>
+                    <Text className={classnames(styles.simulateBtn, styles.failBtn)} onClick={() => handleSimulateFail(record.id)}>模拟失败</Text>
+                  </View>
+                )}
+              </View>
             </View>
           ))
         )}

@@ -65,6 +65,77 @@
   flex: 1;
 }
 
+.timeline {
+  padding-left: $spacing-xs;
+}
+
+.timelineItem {
+  display: flex;
+  min-height: 100rpx;
+}
+
+.timelineLeft {
+  width: 64rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.timelineDot {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.timelineDotText {
+  font-size: 22rpx;
+  color: #fff;
+}
+
+.timelineLine {
+  width: 4rpx;
+  flex: 1;
+  background: $color-divider;
+  margin: 4rpx 0;
+}
+
+.timelineContent {
+  flex: 1;
+  padding-bottom: $spacing-lg;
+  padding-left: $spacing-sm;
+}
+
+.timelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4rpx;
+}
+
+.timelineLabel {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.timelineTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.timelineDetail {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  display: block;
+  margin-top: 4rpx;
+}
+
 .itemRow {
   display: flex;
   justify-content: space-between;
@@ -263,23 +334,3 @@
   color: $color-primary;
   font-weight: $font-weight-semibold;
 }
-
-.frozenRow {
-  display: flex;
-  justify-content: space-between;
-  padding: $spacing-xs 0;
-  margin-top: $spacing-xs;
-  padding-top: $spacing-sm;
-  border-top: 1rpx dashed $color-border;
-}
-
-.frozenLabel {
-  font-size: $font-size-xs;
-  color: $color-text-tertiary;
-}
-
-.frozenValue {
-  font-size: $font-size-xs;
-  color: $color-warning;
-}
-

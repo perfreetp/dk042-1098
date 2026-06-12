@@ -23,6 +23,13 @@ export type OrderStatus = 'pending' | 'recycled' | 'rejected';
 
 export type PickupType = 'door' | 'spot';
 
+export interface TimelineEvent {
+  type: 'created' | 'accepted' | 'photo' | 'settled' | 'rejected' | 'handover';
+  label: string;
+  time: string;
+  detail?: string;
+}
+
 export interface Order {
   id: string;
   orderNo: string;
@@ -38,13 +45,17 @@ export interface Order {
   contactPhone: string;
   remark?: string;
   createdAt: string;
+  acceptedAt?: string;
+  photoVerifiedAt?: string;
   recycledAt?: string;
+  rejectedAt?: string;
   rejectReason?: string;
   images?: string[];
   collectorName?: string;
   className?: string;
   handoverNo?: string;
   bonusRate?: number;
+  timeline?: TimelineEvent[];
 }
 
 export interface BatchItem {
@@ -84,6 +95,19 @@ export interface UserInfo {
   avatar?: string;
 }
 
+export type WalletEntryType = 'recycle_income' | 'withdraw_freeze' | 'withdraw_success' | 'withdraw_failed';
+
+export interface WalletEntry {
+  id: string;
+  type: WalletEntryType;
+  amount: number;
+  title: string;
+  time: string;
+  relatedId?: string;
+  relatedType?: 'order' | 'withdraw';
+  detail?: string;
+}
+
 export interface WithdrawRecord {
   id: string;
   amount: number;
@@ -91,4 +115,5 @@ export interface WithdrawRecord {
   createdAt: string;
   account: string;
   accountType: 'wechat' | 'alipay' | 'bank';
+  failReason?: string;
 }

@@ -8,7 +8,8 @@ export default defineAppConfig({
     'pages/order-detail/index',
     'pages/withdraw/index',
     'pages/price-notice/index',
-    'pages/faq/index'
+    'pages/faq/index',
+    'pages/wallet/index'
   ],
   window: {
     backgroundTextStyle: 'light',

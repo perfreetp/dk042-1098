@@ -164,6 +164,12 @@
   margin-left: $spacing-sm;
 }
 
+.moreItems {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
 .priceSection {
   margin-top: $spacing-md;
   padding-top: $spacing-md;
@@ -244,15 +250,32 @@
   flex-wrap: wrap;
 }
 
-.photoItem {
+.photoItemWrapper {
+  position: relative;
   width: 160rpx;
   height: 160rpx;
   border-radius: $radius-md;
-  background: $color-bg-page;
+  overflow: hidden;
+}
+
+.photoView {
+  width: 100%;
+  height: 100%;
+}
+
+.photoRemove {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-round;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
 }
 
 .photoAdd {
@@ -265,11 +288,6 @@
   justify-content: center;
   font-size: 48rpx;
   color: $color-text-tertiary;
-}
-
-.photoImg {
-  width: 100%;
-  height: 100%;
 }
 
 .rejectSection {
@@ -400,21 +418,6 @@
   color: $color-text-secondary;
 }
 
-.photoRemove {
-  position: absolute;
-  top: 8rpx;
-  right: 8rpx;
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: $radius-round;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  font-size: 24rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .doneBadge {
   font-size: $font-size-xs;
   padding: 6rpx 16rpx;
@@ -437,19 +440,6 @@
   gap: $spacing-xs;
 }
 
-.photoItemWrapper {
-  position: relative;
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: $radius-md;
-  overflow: hidden;
-}
-
-.photoView {
-  width: 100%;
-  height: 100%;
-}
-
 .viewDetailBtn {
   padding: 8rpx 20rpx;
   background: $color-bg-hover;
@@ -466,3 +456,74 @@
   margin-top: $spacing-sm;
 }
 
+.routeIndex {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-round;
+  background: $color-primary;
+  color: $color-text-white;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-xs;
+}
+
+.routeSummary {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  color: $color-text-white;
+}
+
+.routeSummaryTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  display: block;
+  margin-bottom: $spacing-md;
+}
+
+.routeStats {
+  display: flex;
+  justify-content: space-around;
+}
+
+.routeStatItem {
+  text-align: center;
+}
+
+.routeStatValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  display: block;
+  margin-bottom: $spacing-xs;
+}
+
+.routeStatLabel {
+  font-size: $font-size-xs;
+  opacity: 0.9;
+}
+
+.routeGroup {
+  margin-bottom: $spacing-md;
+}
+
+.routeGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+  padding: $spacing-sm 0;
+}
+
+.routeGroupIcon {
+  font-size: $font-size-lg;
+}
+
+.routeGroupTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}

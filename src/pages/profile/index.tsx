@@ -93,7 +93,7 @@ const ProfilePage: React.FC = () => {
             <View className={`${styles.actionBtn} ${styles.primaryBtn}`} onClick={handleWithdraw}>
               <Text>提现</Text>
             </View>
-            <View className={`${styles.actionBtn} ${styles.secondaryBtn}`}>
+            <View className={`${styles.actionBtn} ${styles.secondaryBtn}`} onClick={() => Taro.navigateTo({ url: '/pages/wallet/index' })}>
               <Text>明细</Text>
             </View>
           </View>

@@ -1,0 +1,115 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-md $page-padding 40rpx;
+  background: $color-bg-page;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-lg;
+  color: $color-text-white;
+}
+
+.headerTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  display: block;
+  margin-bottom: $spacing-md;
+}
+
+.balanceRow {
+  display: flex;
+  justify-content: space-around;
+}
+
+.balanceItem {
+  text-align: center;
+}
+
+.balanceLabel {
+  font-size: $font-size-xs;
+  opacity: 0.9;
+  display: block;
+  margin-bottom: $spacing-xs;
+}
+
+.balanceValue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+}
+
+.entryCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.entryIcon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  flex-shrink: 0;
+}
+
+.entryInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.entryTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+}
+
+.entryTitle {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.entryAmount {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.entryBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.entryDetail {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  flex: 1;
+  @include text-ellipsis;
+  margin-right: $spacing-sm;
+}
+
+.entryTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.entryLink {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  display: block;
+  margin-top: $spacing-xs;
+}

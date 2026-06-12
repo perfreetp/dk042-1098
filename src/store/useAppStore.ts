@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { EvaluateItem, BatchItem, Order, UserInfo, WithdrawRecord } from '@/types';
+import { EvaluateItem, BatchItem, Order, UserInfo, WithdrawRecord, WalletEntry, TimelineEvent } from '@/types';
 import { orderList as mockOrders } from '@/data/orders';
 import { mockUser } from '@/data/notices';
 import { withdrawRecords as mockWithdrawRecords } from '@/data/notices';
@@ -11,6 +11,7 @@ interface AppState {
   orders: Order[];
   user: UserInfo;
   withdrawRecords: WithdrawRecord[];
+  walletEntries: WalletEntry[];
   lastHandoverOrder: Order | null;
 
   addEvaluateItem: (item: EvaluateItem) => void;
@@ -25,10 +26,13 @@ interface AppState {
   addOrder: (order: Order) => void;
   updateOrderStatus: (orderId: string, status: Order['status'], finalPrice?: number, rejectReason?: string) => void;
   updateOrderImages: (orderId: string, images: string[]) => void;
+  appendTimelineEvent: (orderId: string, event: TimelineEvent) => void;
   setLastHandoverOrder: (order: Order | null) => void;
 
   updateUserBalance: (amount: number, type: 'add' | 'subtract' | 'freeze' | 'unfreeze') => void;
   addWithdrawRecord: (record: WithdrawRecord) => void;
+  failWithdrawRecord: (recordId: string, reason: string) => void;
+  addWalletEntry: (entry: WalletEntry) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -39,6 +43,12 @@ export const useAppStore = create<AppState>()(
       orders: mockOrders,
       user: mockUser,
       withdrawRecords: mockWithdrawRecords,
+      walletEntries: [
+        { id: 'we1', type: 'recycle_income', amount: 130, title: '回收到账', time: '2024-01-12 16:30:00', relatedId: mockOrders[2]?.id, relatedType: 'order', detail: '高等数学等3本教材' },
+        { id: 'we2', type: 'withdraw_freeze', amount: -100, title: '提现冻结', time: '2024-01-10 14:30:00', relatedId: 'w1', relatedType: 'withdraw', detail: '提现至微信钱包' },
+        { id: 'we3', type: 'withdraw_success', amount: 100, title: '提现成功', time: '2024-01-11 10:00:00', relatedId: 'w1', relatedType: 'withdraw', detail: '微信钱包到账' },
+        { id: 'we4', type: 'recycle_income', amount: 56.5, title: '回收到账', time: '2024-01-08 11:20:00', relatedId: mockOrders[3]?.id, relatedType: 'order', detail: '大学英语等2本教材' }
+      ],
       lastHandoverOrder: null,
 
       addEvaluateItem: (item) =>
@@ -72,11 +82,16 @@ export const useAppStore = create<AppState>()(
 
       addOrder: (order) =>
         set((state) => ({ orders: [order, ...state.orders] })),
+
       updateOrderStatus: (orderId, status, finalPrice, rejectReason) => {
         const state = get();
         const order = state.orders.find((o) => o.id === orderId);
+        if (!order) return;
 
-        if (order && status === 'recycled' && finalPrice !== undefined) {
+        const now = new Date().toLocaleString();
+        const newEvents: TimelineEvent[] = [];
+
+        if (status === 'recycled' && finalPrice !== undefined) {
           set({
             user: {
               ...state.user,
@@ -84,7 +99,23 @@ export const useAppStore = create<AppState>()(
               totalEarning: Number(((state.user.totalEarning || 0) + finalPrice).toFixed(2))
             }
           });
-          console.log('[Store] 回收完成，余额增加:', finalPrice, '新余额:', get().user.balance);
+
+          newEvents.push({ type: 'settled', label: '结算到账', time: now, detail: `¥${finalPrice.toFixed(2)}已到账` });
+
+          get().addWalletEntry({
+            id: 'we' + Date.now(),
+            type: 'recycle_income',
+            amount: finalPrice,
+            title: '回收到账',
+            time: now,
+            relatedId: orderId,
+            relatedType: 'order',
+            detail: order.items.map(i => i.textbook.name).slice(0, 2).join('、') + (order.items.length > 2 ? `等${order.items.length}种` : '')
+          });
+        }
+
+        if (status === 'rejected') {
+          newEvents.push({ type: 'rejected', label: '订单驳回', time: now, detail: rejectReason || '原因未填写' });
         }
 
         set((state) => ({
@@ -93,22 +124,49 @@ export const useAppStore = create<AppState>()(
               ? {
                   ...o,
                   status,
-                  finalPrice,
+                  finalPrice: status === 'recycled' ? finalPrice : o.finalPrice,
                   rejectReason,
-                  recycledAt: status === 'recycled' ? new Date().toLocaleString() : undefined
+                  recycledAt: status === 'recycled' ? now : undefined,
+                  rejectedAt: status === 'rejected' ? now : undefined,
+                  timeline: [...(o.timeline || []), ...newEvents]
                 }
               : o
           )
         }));
       },
+
       updateOrderImages: (orderId, images) => {
-        console.log('[Store] 更新订单照片:', orderId, '照片数:', images.length);
+        const state = get();
+        const order = state.orders.find((o) => o.id === orderId);
+        const hadImages = (order?.images?.length || 0) > 0;
+        const nowHasImages = images.length > 0;
+
         set((state) => ({
           orders: state.orders.map((o) =>
             o.id === orderId ? { ...o, images } : o
           )
         }));
+
+        if (!hadImages && nowHasImages && order) {
+          get().appendTimelineEvent(orderId, {
+            type: 'photo',
+            label: '拍照核验',
+            time: new Date().toLocaleString(),
+            detail: `已上传${images.length}张核验照片`
+          });
+        }
       },
+
+      appendTimelineEvent: (orderId, event) => {
+        set((state) => ({
+          orders: state.orders.map((o) =>
+            o.id === orderId
+              ? { ...o, timeline: [...(o.timeline || []), event] }
+              : o
+          )
+        }));
+      },
+
       setLastHandoverOrder: (order) => set({ lastHandoverOrder: order }),
 
       updateUserBalance: (amount, type) => {
@@ -133,47 +191,62 @@ export const useAppStore = create<AppState>()(
               break;
           }
 
-          console.log('[Store] 更新余额:', type, '金额:', amount, '新余额:', newBalance, '冻结:', newFrozen);
-
           return {
-            user: {
-              ...state.user,
-              balance: newBalance,
-              frozenBalance: newFrozen
-            }
+            user: { ...state.user, balance: newBalance, frozenBalance: newFrozen }
           };
         });
       },
+
       addWithdrawRecord: (record) => {
         set((state) => ({
           withdrawRecords: [record, ...state.withdrawRecords]
         }));
-        console.log('[Store] 添加提现记录:', record.id, '金额:', record.amount);
+      },
+
+      failWithdrawRecord: (recordId, reason) => {
+        const state = get();
+        const record = state.withdrawRecords.find((r) => r.id === recordId);
+        if (!record || record.status !== 'pending') return;
+
+        get().updateUserBalance(record.amount, 'unfreeze');
+
+        set((state) => ({
+          withdrawRecords: state.withdrawRecords.map((r) =>
+            r.id === recordId ? { ...r, status: 'failed' as const, failReason: reason } : r
+          )
+        }));
+
+        get().addWalletEntry({
+          id: 'we' + Date.now(),
+          type: 'withdraw_failed',
+          amount: record.amount,
+          title: '提现失败退回',
+          time: new Date().toLocaleString(),
+          relatedId: recordId,
+          relatedType: 'withdraw',
+          detail: reason
+        });
+
+        console.log('[Store] 提现失败退回:', record.amount, '原因:', reason);
+      },
+
+      addWalletEntry: (entry) => {
+        set((state) => ({
+          walletEntries: [entry, ...state.walletEntries]
+        }));
       }
     }),
     {
       name: 'textbook-recycle-storage',
       storage: createJSONStorage(() => ({
         getItem: (key) => {
-          try {
-            return Taro.getStorageSync(key);
-          } catch {
-            return null;
-          }
+          try { return Taro.getStorageSync(key); } catch { return null; }
         },
         setItem: (key, value) => {
-          try {
-            Taro.setStorageSync(key, value);
-          } catch {
-            console.error('[Storage] 保存失败');
-          }
+          try { Taro.setStorageSync(key, value); } catch { console.error('[Storage] 保存失败'); }
         },
         removeItem: (key) => {
-          try {
-            Taro.removeStorageSync(key);
-          } catch {
-            console.error('[Storage] 删除失败');
-          }
+          try { Taro.removeStorageSync(key); } catch { console.error('[Storage] 删除失败'); }
         }
       }))
     }
