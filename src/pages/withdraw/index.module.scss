@@ -334,3 +334,99 @@
   50% { background: #eff6ff; }
   100% { background: $color-bg-card; }
 }
+
+.flowCard {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: $radius-md;
+}
+
+.flowTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: #1d4ed8;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.flowList {
+  position: relative;
+}
+
+.flowItem {
+  position: relative;
+  background: #fff;
+  border-radius: $radius-xs;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-xs;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.flowItemLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+  min-width: 0;
+}
+
+.flowIcon {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  flex-shrink: 0;
+}
+
+.flowInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.flowLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+}
+
+.flowDetail {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  display: block;
+  margin-top: 2rpx;
+  @include text-ellipsis;
+}
+
+.flowTime {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  display: block;
+  margin-top: 2rpx;
+}
+
+.flowAmount {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.flowArrow {
+  position: absolute;
+  left: 24rpx;
+  bottom: -18rpx;
+  font-size: $font-size-xs;
+  color: #9ca3af;
+  z-index: 2;
+}

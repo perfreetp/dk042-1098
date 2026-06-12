@@ -9,7 +9,8 @@ export default defineAppConfig({
     'pages/withdraw/index',
     'pages/price-notice/index',
     'pages/faq/index',
-    'pages/wallet/index'
+    'pages/wallet/index',
+    'pages/monthly-detail/index'
   ],
   window: {
     backgroundTextStyle: 'light',

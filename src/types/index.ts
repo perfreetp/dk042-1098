@@ -24,7 +24,7 @@ export type OrderStatus = 'pending' | 'recycled' | 'rejected';
 export type PickupType = 'door' | 'spot';
 
 export interface TimelineEvent {
-  type: 'created' | 'accepted' | 'photo' | 'settled' | 'rejected' | 'handover';
+  type: 'created' | 'handover' | 'accepted' | 'arrived' | 'photo' | 'settled' | 'rejected';
   label: string;
   time: string;
   detail?: string;

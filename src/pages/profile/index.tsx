@@ -58,12 +58,10 @@ const ProfilePage: React.FC = () => {
   }, []);
 
   const handleJumpRecycledList = () => {
-    Taro.switchTab({ url: '/pages/records/index' });
+    Taro.navigateTo({ url: '/pages/monthly-detail/index?tab=recycle' });
   };
-  const handleJumpWithdrawList = (recordId?: string) => {
-    Taro.navigateTo({
-      url: `/pages/withdraw/index${recordId ? `?wid=${recordId}` : ''}`
-    });
+  const handleJumpMonthlyDetail = (tab: 'pending' | 'success' | 'failed') => {
+    Taro.navigateTo({ url: `/pages/monthly-detail/index?tab=${tab}` });
   };
 
   const menuGroups = [
@@ -179,7 +177,7 @@ const ProfilePage: React.FC = () => {
             <Text className={styles.monthItemAmount}>¥{formatMoney(monthlyStats.recycleIncome)}</Text>
             <Text className={styles.monthItemLabel}>本月回收到账</Text>
           </View>
-          <View className={styles.monthItem} onClick={() => handleJumpWithdrawList()}>
+          <View className={styles.monthItem} onClick={() => handleJumpMonthlyDetail('pending')}>
             <View className={styles.monthItemHeader}>
               <Text className={styles.monthItemIcon}>❄️</Text>
               <Text className={styles.monthItemCount}>{monthlyStats.pendingCount}笔</Text>
@@ -187,7 +185,7 @@ const ProfilePage: React.FC = () => {
             <Text className={styles.monthItemAmount}>¥{formatMoney(monthlyStats.pendingWithdrawals)}</Text>
             <Text className={styles.monthItemLabel}>提现中</Text>
           </View>
-          <View className={styles.monthItem} onClick={() => handleJumpWithdrawList(monthlyStats.succeededWithdrawals[0]?.id)}>
+          <View className={styles.monthItem} onClick={() => handleJumpMonthlyDetail('success')}>
             <View className={styles.monthItemHeader}>
               <Text className={styles.monthItemIcon}>✅</Text>
               <Text className={styles.monthItemCount}>{monthlyStats.succeededCount}笔</Text>
@@ -195,7 +193,7 @@ const ProfilePage: React.FC = () => {
             <Text className={styles.monthItemAmount}>¥{formatMoney(monthlyStats.succeededWithdrawals)}</Text>
             <Text className={styles.monthItemLabel}>已提现</Text>
           </View>
-          <View className={styles.monthItem} onClick={() => handleJumpWithdrawList(monthlyStats.failedRefunds[0]?.id)}>
+          <View className={styles.monthItem} onClick={() => handleJumpMonthlyDetail('failed')}>
             <View className={styles.monthItemHeader}>
               <Text className={styles.monthItemIcon}>↩️</Text>
               <Text className={styles.monthItemCount}>{monthlyStats.failedCount}笔</Text>

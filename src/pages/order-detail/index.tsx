@@ -11,29 +11,32 @@ import styles from './index.module.scss';
 
 const timelineIconMap: Record<TimelineEvent['type'], string> = {
   created: '📋',
+  handover: '📦',
   accepted: '🤝',
+  arrived: '📍',
   photo: '📸',
   settled: '💰',
-  rejected: '❌',
-  handover: '📦'
+  rejected: '❌'
 };
 
 const timelineColorMap: Record<TimelineEvent['type'], string> = {
   created: '#3b82f6',
+  handover: '#06b6d4',
   accepted: '#8b5cf6',
+  arrived: '#ec4899',
   photo: '#f59e0b',
   settled: '#22c55e',
-  rejected: '#ef4444',
-  handover: '#06b6d4'
+  rejected: '#ef4444'
 };
 
 const TIMELINE_ORDER: Record<TimelineEvent['type'], number> = {
   created: 0,
   handover: 1,
   accepted: 2,
-  photo: 3,
-  settled: 4,
-  rejected: 4
+  arrived: 3,
+  photo: 4,
+  settled: 5,
+  rejected: 5
 };
 
 const OrderDetailPage: React.FC = () => {

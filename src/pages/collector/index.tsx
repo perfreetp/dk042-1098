@@ -106,6 +106,14 @@ const CollectorPage: React.FC = () => {
   }, [selectedOrder?.id]);
 
   const navigateToOrder = (order: Order) => {
+    if (!order.timeline?.find(e => e.type === 'arrived')) {
+      appendTimelineEvent(order.id, {
+        type: 'arrived',
+        label: order.pickupType === 'door' ? '已到达上门地址' : '已到达回收点',
+        time: new Date().toLocaleString(),
+        detail: order.pickupType === 'door' ? (order.address || '') : (order.spotName || '')
+      });
+    }
     let lat = 39.908823, lng = 116.39747, name = '', address = '';
     if (order.pickupType === 'door') {
       lat = 39.908823 + Math.random() * 0.005;
@@ -205,7 +213,7 @@ const CollectorPage: React.FC = () => {
     const region = extractRegion(order);
     const regionTag = { '宿舍区': '🏠 宿舍', '教学楼': '🏫 教学', '图书馆': '📚 图书', '班级': '🎓 班级', '其他': '📍 其他' }[region] || '📍';
     return (
-      <View key={order.id} className={styles.orderCard} onClick={() => activeTab !== 'route' ? setSelectedOrderId(order.id) : handleAcceptAndSelect(order)}>
+      <View key={order.id} className={styles.orderCard} onClick={() => handleAcceptAndSelect(order)}>
         <View className={styles.cardHeader}>
           <View className={styles.orderHeader}>
             {index !== undefined && <Text className={styles.routeIndex}>{index + 1}</Text>}
@@ -266,7 +274,7 @@ const CollectorPage: React.FC = () => {
             <View className={styles.viewDetailBtn} onClick={() => handleViewDetail(order.id)}><Text>查看详情 →</Text></View>
           </View>
         )}
-        {activeTab === 'todo' && selectedOrder?.id === order.id && (
+        {(activeTab === 'todo' || activeTab === 'route') && selectedOrder?.id === order.id && (
           <>
             <View className={styles.finalPriceRow}>
               <Text className={styles.finalLabel}>最终结算价</Text>
@@ -363,7 +371,7 @@ const CollectorPage: React.FC = () => {
           : doneOrders.map((order) => renderOrderCard(order))
       )}
 
-      {activeTab === 'todo' && selectedOrder && (
+      {(activeTab === 'todo' || activeTab === 'route') && selectedOrder && (
         <View className={styles.bottomBar}>
           <View className={`${styles.actionBtn} ${styles.rejectBtn}`} onClick={handleReject}><Text>驳回订单</Text></View>
           <View className={`${styles.actionBtn} ${styles.confirmBtn}`} onClick={handleConfirm}><Text>确认回收</Text></View>

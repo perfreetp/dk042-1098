@@ -5,15 +5,22 @@ import { useRouter } from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { formatMoney } from '@/utils';
-import { WithdrawRecord } from '@/types';
+import { WithdrawRecord, WalletEntry } from '@/types';
 import styles from './index.module.scss';
 
 type AccountType = 'wechat' | 'alipay' | 'bank';
 
+const FLOW_META: Record<WalletEntry['type'], { label: string; icon: string; color: string; prefix: string }> = {
+  recycle_income: { label: '回收到账', icon: '💰', color: '#22c55e', prefix: '+' },
+  withdraw_freeze: { label: '提现申请冻结', icon: '❄️', color: '#f59e0b', prefix: '-' },
+  withdraw_success: { label: '提现成功到账', icon: '✅', color: '#3b82f6', prefix: '' },
+  withdraw_failed: { label: '提现失败退回', icon: '↩️', color: '#ef4444', prefix: '+' }
+};
+
 const WithdrawPage: React.FC = () => {
   const router = useRouter();
   const widFromUrl = router.params.wid || '';
-  const { user, withdrawRecords, updateUserBalance, addWithdrawRecord, addWalletEntry, failWithdrawRecord } = useAppStore();
+  const { user, withdrawRecords, walletEntries, updateUserBalance, addWithdrawRecord, addWalletEntry, failWithdrawRecord } = useAppStore();
   const [amount, setAmount] = useState<string>('');
   const [accountType, setAccountType] = useState<AccountType>('wechat');
   const [accountNo, setAccountNo] = useState('');
@@ -37,6 +44,12 @@ const WithdrawPage: React.FC = () => {
   }, [widFromUrl]);
 
   const targetRecord = useMemo(() => withdrawRecords.find(r => r.id === widFromUrl), [withdrawRecords, widFromUrl]);
+
+  const relatedFlows = useMemo(() => {
+    if (!widFromUrl) return [] as WalletEntry[];
+    return walletEntries.filter(e => e.relatedType === 'withdraw' && e.relatedId === widFromUrl)
+      .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  }, [walletEntries, widFromUrl]);
 
   const amountNum = Number(amount) || 0;
   const availableBalance = user.balance;
@@ -299,6 +312,34 @@ const WithdrawPage: React.FC = () => {
             </Text>
             {targetRecord.failReason && (
               <Text className={styles.targetBannerReason}>失败原因：{targetRecord.failReason}</Text>
+            )}
+            {relatedFlows.length > 0 && (
+              <View className={styles.flowCard}>
+                <Text className={styles.flowTitle}>💰 资金流转轨迹</Text>
+                <View className={styles.flowList}>
+                  {relatedFlows.map((f, idx) => {
+                    const m = FLOW_META[f.type];
+                    return (
+                      <View className={styles.flowItem} key={idx}>
+                        <View className={styles.flowItemLeft}>
+                          <View className={styles.flowIcon} style={{ background: m.color + '20', color: m.color }}>
+                            <Text>{m.icon}</Text>
+                          </View>
+                          <View className={styles.flowInfo}>
+                            <Text className={styles.flowLabel}>{m.label}</Text>
+                            {f.detail && <Text className={styles.flowDetail}>{f.detail}</Text>}
+                            <Text className={styles.flowTime}>{f.time}</Text>
+                          </View>
+                        </View>
+                        <Text className={styles.flowAmount} style={{ color: m.color }}>
+                          {m.prefix}¥{formatMoney(Math.abs(f.amount))}
+                        </Text>
+                        {idx < relatedFlows.length - 1 && <View className={styles.flowArrow}>↓</View>}
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
             )}
           </View>
         </View>

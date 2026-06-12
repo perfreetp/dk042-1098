@@ -1,0 +1,266 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-md $page-padding 60rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-md;
+  color: $color-text-white;
+}
+
+.pageTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.pageSubtitle {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+  display: block;
+  margin-bottom: $spacing-lg;
+}
+
+.summaryRow {
+  display: flex;
+  gap: $spacing-lg;
+}
+
+.summaryItem {
+  background: rgba(255, 255, 255, 0.15);
+  padding: $spacing-md $spacing-lg;
+  border-radius: $radius-md;
+  flex: 1;
+}
+
+.summaryValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.summaryLabel {
+  font-size: $font-size-xs;
+  opacity: 0.9;
+}
+
+.tabs {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xs;
+  margin-bottom: $spacing-md;
+}
+
+.tabItem {
+  flex: 1;
+  padding: $spacing-md 0;
+  text-align: center;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-primary;
+    color: $color-text-white;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.orderCard, .withdrawCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  position: relative;
+}
+
+.cardTop {
+  padding-bottom: $spacing-sm;
+  border-bottom: 1rpx solid $color-divider;
+  margin-bottom: $spacing-sm;
+}
+
+.cardTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4rpx;
+}
+
+.orderNo, .withdrawId {
+  font-size: $font-size-sm;
+  font-family: monospace;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.cardTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.statusBadge {
+  font-size: $font-size-xs;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-button;
+  flex-shrink: 0;
+
+  &.statusRecycled {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+  &.statusPending {
+    background: #fef3c7;
+    color: #d97706;
+  }
+  &.statusRejected {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.metaItem {
+  font-size: $font-size-xs;
+  background: $color-bg-page;
+  color: $color-text-secondary;
+  padding: 4rpx 14rpx;
+  border-radius: $radius-xs;
+}
+
+.itemsPreview {
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-sm;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xs 0;
+}
+
+.itemName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  flex: 1;
+  @include text-ellipsis;
+}
+
+.itemInfo {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.moreHint {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  padding-top: $spacing-xs;
+  border-top: 1rpx dashed $color-divider;
+  margin-top: $spacing-xs;
+}
+
+.cardBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-sm;
+}
+
+.estimateLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  text-decoration: line-through;
+}
+
+.finalPrice {
+  text-align: right;
+}
+
+.finalLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-right: $spacing-xs;
+}
+
+.finalValue {
+  font-size: $font-size-lg;
+  color: $color-error;
+  font-weight: $font-weight-bold;
+}
+
+.cardArrow {
+  position: absolute;
+  bottom: $spacing-md;
+  left: $spacing-lg;
+  font-size: $font-size-xs;
+  color: $color-primary;
+}
+
+.withdrawBody {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-sm 0;
+  margin-bottom: $spacing-sm;
+}
+
+.withdrawLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.withdrawAmount {
+  font-size: $font-size-xl;
+  color: $color-error;
+  font-weight: $font-weight-bold;
+}
+
+.withdrawAccount {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.failBox {
+  background: #fef2f2;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-top: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.failLabel {
+  font-size: $font-size-xs;
+  color: $color-error;
+  display: block;
+  margin-bottom: 4rpx;
+  font-weight: $font-weight-medium;
+}
+
+.failText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  display: block;
+}
