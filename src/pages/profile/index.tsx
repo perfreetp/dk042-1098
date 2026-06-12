@@ -4,10 +4,11 @@ import Taro from '@tarojs/taro';
 import { useAppStore } from '@/store/useAppStore';
 import { formatMoney } from '@/utils';
 import { priceNoticeList } from '@/data/notices';
+import { WalletEntry, WithdrawRecord, Order } from '@/types';
 import styles from './index.module.scss';
 
 const ProfilePage: React.FC = () => {
-  const { user, orders } = useAppStore();
+  const { user, orders, walletEntries, withdrawRecords } = useAppStore();
 
   const stats = useMemo(() => {
     const totalOrders = orders.length;
@@ -16,6 +17,54 @@ const ProfilePage: React.FC = () => {
     const totalEarning = recycledOrders.reduce((sum, o) => sum + (o.finalPrice || o.estimatedPrice), 0);
     return { totalOrders, totalBooks, totalEarning };
   }, [orders]);
+
+  const monthlyStats = useMemo(() => {
+    const now = new Date();
+    const thisMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const isThisMonth = (dateStr: string) => {
+      try {
+        const d = new Date(dateStr.replace(/\//g, '-'));
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      } catch {
+        return dateStr.includes(thisMonthPrefix);
+      }
+    };
+
+    const recycledThisMonth: Order[] = orders.filter(o => o.status === 'recycled' && o.recycledAt && isThisMonth(o.recycledAt));
+    const recycleIncome = recycledThisMonth.reduce((s, o) => s + (o.finalPrice || o.estimatedPrice), 0);
+
+    const withdrawalsThisMonth: WithdrawRecord[] = withdrawRecords.filter(r => isThisMonth(r.createdAt));
+    const pendingWithdrawals = withdrawalsThisMonth.filter(r => r.status === 'pending');
+    const pendingAmount = pendingWithdrawals.reduce((s, r) => s + r.amount, 0);
+    const succeededWithdrawals = withdrawalsThisMonth.filter(r => r.status === 'success');
+    const succeededAmount = succeededWithdrawals.reduce((s, r) => s + r.amount, 0);
+
+    const failedRefunds = withdrawalsThisMonth.filter(r => r.status === 'failed');
+    const failedRefundAmount = failedRefunds.reduce((s, r) => s + r.amount, 0);
+
+    return {
+      recycleIncome, recycleCount: recycledThisMonth.length,
+      pendingWithdrawals: pendingAmount, pendingCount: pendingWithdrawals.length,
+      succeededWithdrawals: succeededAmount, succeededCount: succeededWithdrawals.length,
+      failedRefunds: failedRefundAmount, failedCount: failedRefunds.length,
+      recycledThisMonth, pendingWithdrawals, succeededWithdrawals, failedRefunds
+    };
+  }, [orders, withdrawRecords]);
+
+  const monthLabel = useMemo(() => {
+    const now = new Date();
+    return `${now.getMonth() + 1}月对账单`;
+  }, []);
+
+  const handleJumpRecycledList = () => {
+    Taro.switchTab({ url: '/pages/records/index' });
+  };
+  const handleJumpWithdrawList = (recordId?: string) => {
+    Taro.navigateTo({
+      url: `/pages/withdraw/index${recordId ? `?wid=${recordId}` : ''}`
+    });
+  };
 
   const menuGroups = [
     {
@@ -110,6 +159,49 @@ const ProfilePage: React.FC = () => {
           <View className={styles.statItem}>
             <Text className={styles.statValue}>¥{formatMoney(stats.totalEarning)}</Text>
             <Text className={styles.statLabel}>已完成收入</Text>
+          </View>
+        </View>
+      </View>
+
+      <View className={styles.monthCard}>
+        <View className={styles.monthHeader}>
+          <Text className={styles.monthTitle}>{monthLabel}</Text>
+          <View className={styles.monthActions}>
+            <Text className={styles.monthAction} onClick={() => Taro.navigateTo({ url: '/pages/wallet/index' })}>查看明细 ›</Text>
+          </View>
+        </View>
+        <View className={styles.monthGrid}>
+          <View className={styles.monthItem} onClick={handleJumpRecycledList}>
+            <View className={styles.monthItemHeader}>
+              <Text className={styles.monthItemIcon}>💰</Text>
+              <Text className={styles.monthItemCount}>{monthlyStats.recycleCount}单</Text>
+            </View>
+            <Text className={styles.monthItemAmount}>¥{formatMoney(monthlyStats.recycleIncome)}</Text>
+            <Text className={styles.monthItemLabel}>本月回收到账</Text>
+          </View>
+          <View className={styles.monthItem} onClick={() => handleJumpWithdrawList()}>
+            <View className={styles.monthItemHeader}>
+              <Text className={styles.monthItemIcon}>❄️</Text>
+              <Text className={styles.monthItemCount}>{monthlyStats.pendingCount}笔</Text>
+            </View>
+            <Text className={styles.monthItemAmount}>¥{formatMoney(monthlyStats.pendingWithdrawals)}</Text>
+            <Text className={styles.monthItemLabel}>提现中</Text>
+          </View>
+          <View className={styles.monthItem} onClick={() => handleJumpWithdrawList(monthlyStats.succeededWithdrawals[0]?.id)}>
+            <View className={styles.monthItemHeader}>
+              <Text className={styles.monthItemIcon}>✅</Text>
+              <Text className={styles.monthItemCount}>{monthlyStats.succeededCount}笔</Text>
+            </View>
+            <Text className={styles.monthItemAmount}>¥{formatMoney(monthlyStats.succeededWithdrawals)}</Text>
+            <Text className={styles.monthItemLabel}>已提现</Text>
+          </View>
+          <View className={styles.monthItem} onClick={() => handleJumpWithdrawList(monthlyStats.failedRefunds[0]?.id)}>
+            <View className={styles.monthItemHeader}>
+              <Text className={styles.monthItemIcon}>↩️</Text>
+              <Text className={styles.monthItemCount}>{monthlyStats.failedCount}笔</Text>
+            </View>
+            <Text className={styles.monthItemAmount}>¥{formatMoney(monthlyStats.failedRefunds)}</Text>
+            <Text className={styles.monthItemLabel}>失败退回</Text>
           </View>
         </View>
       </View>

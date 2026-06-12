@@ -15,7 +15,7 @@ const timelineIconMap: Record<TimelineEvent['type'], string> = {
   photo: '📸',
   settled: '💰',
   rejected: '❌',
-  handover: '交接'
+  handover: '📦'
 };
 
 const timelineColorMap: Record<TimelineEvent['type'], string> = {
@@ -25,6 +25,15 @@ const timelineColorMap: Record<TimelineEvent['type'], string> = {
   settled: '#22c55e',
   rejected: '#ef4444',
   handover: '#06b6d4'
+};
+
+const TIMELINE_ORDER: Record<TimelineEvent['type'], number> = {
+  created: 0,
+  handover: 1,
+  accepted: 2,
+  photo: 3,
+  settled: 4,
+  rejected: 4
 };
 
 const OrderDetailPage: React.FC = () => {
@@ -47,31 +56,70 @@ const OrderDetailPage: React.FC = () => {
     );
   }
 
-  const timeline: TimelineEvent[] = order.timeline || [
-    { type: 'created', label: '预约提交', time: order.createdAt, detail: order.pickupType === 'door' ? `上门回收 · ${order.address}` : `定点交书 · ${order.spotName}` }
-  ];
+  const mergedTimeline: TimelineEvent[] = useMemo(() => {
+    const result: TimelineEvent[] = [];
+    const seen = new Set<TimelineEvent['type']>();
 
-  if (order.handoverNo && !timeline.find(e => e.type === 'handover')) {
-    timeline.push({
-      type: 'handover',
-      label: '批量交接',
-      time: order.createdAt,
-      detail: `交接编号：${order.handoverNo}${order.className ? ` · ${order.className}` : ''}`
+    const raw = order.timeline || [];
+    if (raw.length === 0 && order.createdAt) {
+      result.push({
+        type: 'created',
+        label: '预约提交',
+        time: order.createdAt,
+        detail: order.pickupType === 'door'
+          ? `上门回收 · ${order.address || ''}`
+          : `定点交书 · ${order.spotName || ''}`
+      });
+      seen.add('created');
+    }
+
+    for (const ev of raw) {
+      result.push(ev);
+      seen.add(ev.type);
+    }
+
+    if (!seen.has('created') && order.createdAt) {
+      result.unshift({
+        type: 'created',
+        label: '预约提交',
+        time: order.createdAt,
+        detail: order.pickupType === 'door'
+          ? `上门回收 · ${order.address || ''}`
+          : `定点交书 · ${order.spotName || ''}`
+      });
+      seen.add('created');
+    }
+
+    if (order.handoverNo && !seen.has('handover')) {
+      result.push({
+        type: 'handover',
+        label: '批量交接',
+        time: order.createdAt,
+        detail: `交接编号：${order.handoverNo}${order.className ? ` · ${order.className}` : ''}`
+      });
+      seen.add('handover');
+    }
+
+    if (order.status !== 'pending') {
+      if (!seen.has('accepted')) {
+        result.push({
+          type: 'accepted',
+          label: '回收员接单',
+          time: order.recycledAt || order.rejectedAt || order.createdAt,
+          detail: order.collectorName ? `回收员：${order.collectorName}` : '已分配回收员'
+        });
+      }
+    }
+
+    result.sort((a, b) => {
+      const oa = TIMELINE_ORDER[a.type] ?? 99;
+      const ob = TIMELINE_ORDER[b.type] ?? 99;
+      if (oa !== ob) return oa - ob;
+      return new Date(a.time).getTime() - new Date(b.time).getTime();
     });
-  }
 
-  if (order.status === 'recycled' && !timeline.find(e => e.type === 'accepted')) {
-    timeline.splice(1, 0, { type: 'accepted', label: '回收员接单', time: order.recycledAt || order.createdAt, detail: order.collectorName ? `回收员：${order.collectorName}` : '已分配回收员' });
-  }
-
-  if (order.status === 'rejected' && !timeline.find(e => e.type === 'accepted')) {
-    timeline.splice(1, 0, { type: 'accepted', label: '回收员接单', time: order.rejectedAt || order.createdAt, detail: order.collectorName ? `回收员：${order.collectorName}` : '已分配回收员' });
-  }
-
-  timeline.sort((a, b) => {
-    const order_map: Record<string, number> = { created: 0, handover: 1, accepted: 2, photo: 3, settled: 4, rejected: 4 };
-    return (order_map[a.type] || 0) - (order_map[b.type] || 0);
-  });
+    return result;
+  }, [order]);
 
   return (
     <View className={styles.page}>
@@ -93,17 +141,13 @@ const OrderDetailPage: React.FC = () => {
       <View className={styles.infoCard}>
         <Text className={styles.cardTitle}>处理时间线</Text>
         <View className={styles.timeline}>
-          {timeline.map((event, idx) => (
+          {mergedTimeline.map((event, idx) => (
             <View className={styles.timelineItem} key={idx}>
               <View className={styles.timelineLeft}>
                 <View className={styles.timelineDot} style={{ background: timelineColorMap[event.type] }}>
-                  {event.type === 'handover' ? (
-                    <Text className={styles.timelineDotText}>交</Text>
-                  ) : (
-                    <Text className={styles.timelineDotText}>{timelineIconMap[event.type]}</Text>
-                  )}
+                  <Text className={styles.timelineDotText}>{timelineIconMap[event.type]}</Text>
                 </View>
-                {idx < timeline.length - 1 && <View className={styles.timelineLine} />}
+                {idx < mergedTimeline.length - 1 && <View className={styles.timelineLine} />}
               </View>
               <View className={styles.timelineContent}>
                 <View className={styles.timelineHeader}>

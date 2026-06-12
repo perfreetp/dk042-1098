@@ -275,3 +275,62 @@
     border-color: $color-error;
   }
 }
+
+.targetBanner {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1rpx solid #bfdbfe;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  display: flex;
+  gap: $spacing-md;
+}
+
+.targetBannerIcon {
+  font-size: 48rpx;
+  flex-shrink: 0;
+}
+
+.targetBannerBody {
+  flex: 1;
+}
+
+.targetBannerTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: #1d4ed8;
+  display: block;
+  margin-bottom: $spacing-xs;
+}
+
+.targetBannerMeta {
+  font-size: $font-size-sm;
+  color: #475569;
+  display: block;
+}
+
+.targetBannerStatus {
+  font-weight: $font-weight-medium;
+  &.success { color: $color-primary; }
+  &.pending { color: $color-warning; }
+  &.failed { color: $color-error; }
+}
+
+.targetBannerReason {
+  font-size: $font-size-xs;
+  color: $color-error;
+  display: block;
+  margin-top: $spacing-xs;
+}
+
+.highlightRecord {
+  border: 2rpx solid #3b82f6;
+  box-shadow: 0 0 0 6rpx rgba(59, 130, 246, 0.1);
+  animation: highlightPulse 2s ease-out;
+}
+
+@keyframes highlightPulse {
+  0% { background: #dbeafe; }
+  50% { background: #eff6ff; }
+  100% { background: $color-bg-card; }
+}

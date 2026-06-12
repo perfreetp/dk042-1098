@@ -29,7 +29,10 @@ export const orderList: Order[] = [
     contactName: '张三',
     contactPhone: '138****8888',
     remark: '下午3点后方便',
-    createdAt: '2024-01-15 10:30:00'
+    createdAt: '2024-01-15 10:30:00',
+    timeline: [
+      { type: 'created', label: '预约提交', time: '2024-01-15 10:30:00', detail: '上门回收 · 东区12号楼302室' }
+    ]
   },
   {
     id: 'o2',
@@ -64,7 +67,10 @@ export const orderList: Order[] = [
     spotName: '图书馆门口回收点',
     contactName: '李四',
     contactPhone: '139****6666',
-    createdAt: '2024-01-14 15:20:00'
+    createdAt: '2024-01-14 15:20:00',
+    timeline: [
+      { type: 'created', label: '预约提交', time: '2024-01-14 15:20:00', detail: '定点交书 · 图书馆门口回收点' }
+    ]
   },
   {
     id: 'o3',
@@ -96,7 +102,13 @@ export const orderList: Order[] = [
     createdAt: '2024-01-13 09:15:00',
     recycledAt: '2024-01-13 14:30:00',
     collectorName: '回收员小刘',
-    images: ['https://picsum.photos/id/24/200/200']
+    images: ['https://picsum.photos/id/24/200/200'],
+    timeline: [
+      { type: 'created', label: '预约提交', time: '2024-01-13 09:15:00', detail: '上门回收 · 西区5号楼201室' },
+      { type: 'accepted', label: '回收员接单', time: '2024-01-13 10:00:00', detail: '回收员：回收员小刘' },
+      { type: 'photo', label: '拍照核验', time: '2024-01-13 14:20:00', detail: '已上传1张核验照片' },
+      { type: 'settled', label: '结算到账', time: '2024-01-13 14:30:00', detail: '¥48.00已到账' }
+    ]
   },
   {
     id: 'o4',
@@ -127,7 +139,12 @@ export const orderList: Order[] = [
     contactPhone: '136****4444',
     createdAt: '2024-01-12 16:45:00',
     recycledAt: '2024-01-12 17:20:00',
-    collectorName: '回收员小张'
+    collectorName: '回收员小张',
+    timeline: [
+      { type: 'created', label: '预约提交', time: '2024-01-12 16:45:00', detail: '定点交书 · 教学楼A座大厅' },
+      { type: 'accepted', label: '回收员接单', time: '2024-01-12 16:50:00', detail: '回收员：回收员小张' },
+      { type: 'settled', label: '结算到账', time: '2024-01-12 17:20:00', detail: '¥6.00已到账' }
+    ]
   },
   {
     id: 'o5',
@@ -150,7 +167,12 @@ export const orderList: Order[] = [
     contactPhone: '135****3333',
     remark: '希望尽快回收',
     createdAt: '2024-01-11 11:00:00',
-    rejectReason: '书籍损坏严重，内页有大面积涂画和水渍'
+    rejectReason: '书籍损坏严重，内页有大面积涂画和水渍',
+    timeline: [
+      { type: 'created', label: '预约提交', time: '2024-01-11 11:00:00', detail: '上门回收 · 南区8号楼405室' },
+      { type: 'accepted', label: '回收员接单', time: '2024-01-11 11:20:00', detail: '回收员：回收员小刘' },
+      { type: 'rejected', label: '订单驳回', time: '2024-01-11 13:00:00', detail: '书籍损坏严重，内页有大面积涂画和水渍' }
+    ]
   },
   {
     id: 'o6',
@@ -174,7 +196,12 @@ export const orderList: Order[] = [
     contactPhone: '134****2222',
     createdAt: '2024-01-10 08:30:00',
     recycledAt: '2024-01-10 10:15:00',
-    collectorName: '回收员小刘'
+    collectorName: '回收员小刘',
+    timeline: [
+      { type: 'created', label: '预约提交', time: '2024-01-10 08:30:00', detail: '定点交书 · 图书馆门口回收点' },
+      { type: 'accepted', label: '回收员接单', time: '2024-01-10 09:00:00', detail: '回收员：回收员小刘' },
+      { type: 'settled', label: '结算到账', time: '2024-01-10 10:15:00', detail: '¥14.00已到账' }
+    ]
   }
 ];
 

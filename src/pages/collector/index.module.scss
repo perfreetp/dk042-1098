@@ -440,6 +440,15 @@
   gap: $spacing-xs;
 }
 
+.regionTag {
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: $radius-xs;
+  background: #eff6ff;
+  color: #3b82f6;
+  margin-left: $spacing-xs;
+}
+
 .viewDetailBtn {
   padding: 8rpx 20rpx;
   background: $color-bg-hover;
@@ -481,6 +490,13 @@
 .routeSummaryTitle {
   font-size: $font-size-lg;
   font-weight: $font-weight-bold;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.routeSubtitle {
+  font-size: $font-size-xs;
+  opacity: 0.9;
   display: block;
   margin-bottom: $spacing-md;
 }

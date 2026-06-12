@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
+import { useRouter } from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { formatMoney } from '@/utils';
@@ -10,12 +11,32 @@ import styles from './index.module.scss';
 type AccountType = 'wechat' | 'alipay' | 'bank';
 
 const WithdrawPage: React.FC = () => {
+  const router = useRouter();
+  const widFromUrl = router.params.wid || '';
   const { user, withdrawRecords, updateUserBalance, addWithdrawRecord, addWalletEntry, failWithdrawRecord } = useAppStore();
   const [amount, setAmount] = useState<string>('');
   const [accountType, setAccountType] = useState<AccountType>('wechat');
   const [accountNo, setAccountNo] = useState('');
   const [accountName, setAccountName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [highlightId, setHighlightId] = useState<string>('');
+
+  useEffect(() => {
+    if (widFromUrl) {
+      setHighlightId(widFromUrl);
+      Taro.nextTick(() => {
+        const query = Taro.createSelectorQuery();
+        query.select(`#withdraw-${widFromUrl}`).scrollOffset();
+        query.selectViewport().scrollOffset();
+        setTimeout(() => {
+          const el = document?.getElementById?.(`withdraw-${widFromUrl}`);
+          el?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      });
+    }
+  }, [widFromUrl]);
+
+  const targetRecord = useMemo(() => withdrawRecords.find(r => r.id === widFromUrl), [withdrawRecords, widFromUrl]);
 
   const amountNum = Number(amount) || 0;
   const availableBalance = user.balance;
@@ -258,6 +279,31 @@ const WithdrawPage: React.FC = () => {
         <Text>{isSubmitting ? '提交中...' : '确认提现'}</Text>
       </View>
 
+      {targetRecord && (
+        <View className={styles.targetBanner}>
+          <Text className={styles.targetBannerIcon}>📍</Text>
+          <View className={styles.targetBannerBody}>
+            <Text className={styles.targetBannerTitle}>已定位到提现记录</Text>
+            <Text className={styles.targetBannerMeta}>
+              ¥{formatMoney(targetRecord.amount)} · {targetRecord.createdAt} ·
+              <Text
+                className={classnames(
+                  styles.targetBannerStatus,
+                  targetRecord.status === 'success' && styles.success,
+                  targetRecord.status === 'pending' && styles.pending,
+                  targetRecord.status === 'failed' && styles.failed
+                )}
+              >
+                {targetRecord.status === 'success' ? ' 已到账' : targetRecord.status === 'pending' ? ' 处理中' : ' 已失败'}
+              </Text>
+            </Text>
+            {targetRecord.failReason && (
+              <Text className={styles.targetBannerReason}>失败原因：{targetRecord.failReason}</Text>
+            )}
+          </View>
+        </View>
+      )}
+
       <View className={styles.recordsSection}>
         <Text className={styles.recordsTitle}>提现记录</Text>
         {withdrawRecords.length === 0 ? (
@@ -266,7 +312,11 @@ const WithdrawPage: React.FC = () => {
           </View>
         ) : (
           withdrawRecords.map((record) => (
-            <View className={styles.recordCard} key={record.id}>
+            <View
+              id={`withdraw-${record.id}`}
+              className={classnames(styles.recordCard, highlightId === record.id && styles.highlightRecord)}
+              key={record.id}
+            >
               <View className={styles.recordLeft}>
                 <Text className={styles.recordAmount}>-¥{formatMoney(record.amount)}</Text>
                 <Text className={styles.recordMeta}>

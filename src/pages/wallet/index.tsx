@@ -35,7 +35,7 @@ const WalletPage: React.FC = () => {
     if (entry.relatedType === 'order' && entry.relatedId) {
       Taro.navigateTo({ url: `/pages/order-detail/index?id=${entry.relatedId}` });
     } else if (entry.relatedType === 'withdraw' && entry.relatedId) {
-      Taro.navigateTo({ url: `/pages/withdraw/index` });
+      Taro.navigateTo({ url: `/pages/withdraw/index?wid=${entry.relatedId}` });
     }
   };
 
