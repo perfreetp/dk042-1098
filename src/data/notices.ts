@@ -113,5 +113,7 @@ export const mockUser: UserInfo = {
   className: '计算机2101班',
   role: 'student',
   balance: 256.5,
+  frozenBalance: 0,
+  totalEarning: 386.5,
   avatar: 'https://picsum.photos/id/64/200/200'
 };

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text } from '@tarojs/components';
+import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useRouter } from '@tarojs/taro';
 import classnames from 'classnames';
@@ -14,6 +14,14 @@ const OrderDetailPage: React.FC = () => {
   const { orders } = useAppStore();
 
   const order = useMemo(() => orders.find((o) => o.id === orderId), [orders, orderId]);
+
+  const handlePreviewImage = (current: string) => {
+    if (!order?.images) return;
+    Taro.previewImage({
+      current,
+      urls: order.images
+    });
+  };
 
   if (!order) {
     return (
@@ -46,6 +54,18 @@ const OrderDetailPage: React.FC = () => {
           <Text className={styles.infoLabel}>订单编号</Text>
           <Text className={styles.infoValue}>{order.orderNo}</Text>
         </View>
+        {order.handoverNo && (
+          <View className={styles.handoverRow}>
+            <Text className={styles.handoverLabel}>交接编号</Text>
+            <Text className={styles.handoverValue}>{order.handoverNo}</Text>
+          </View>
+        )}
+        {order.className && (
+          <View className={styles.classRow}>
+            <Text className={styles.classLabel}>班级</Text>
+            <Text className={styles.classValue}>{order.className}</Text>
+          </View>
+        )}
         <View className={styles.infoRow}>
           <Text className={styles.infoLabel}>提交时间</Text>
           <Text className={styles.infoValue}>{order.createdAt}</Text>
@@ -105,7 +125,13 @@ const OrderDetailPage: React.FC = () => {
             <Text className={styles.priceLabel}>预估总价</Text>
             <Text className={styles.priceValue}>¥{formatMoney(order.estimatedPrice)}</Text>
           </View>
-          {order.status === 'recycled' && order.finalPrice && (
+          {order.bonusRate && order.bonusRate > 0 && (
+            <View className={styles.bonusRow}>
+              <Text className={styles.bonusLabel}>批量补贴</Text>
+              <Text className={styles.bonusValue}>+{(order.bonusRate * 100).toFixed(0)}%</Text>
+            </View>
+          )}
+          {order.status === 'recycled' && order.finalPrice !== undefined && (
             <>
               <View className={styles.priceRow}>
                 <Text className={styles.priceLabel}>价格调整</Text>
@@ -121,6 +147,28 @@ const OrderDetailPage: React.FC = () => {
             </>
           )}
         </View>
+
+        {order.images && order.images.length > 0 && (
+          <View className={styles.photoSection}>
+            <Text className={styles.photoTitle}>核验照片（{order.images.length}张）</Text>
+            <View className={styles.photoList}>
+              {order.images.map((img, idx) => (
+                <View className={styles.photoItem} key={idx} onClick={() => handlePreviewImage(img)}>
+                  <Image className={styles.photoImg} src={img} mode="aspectFill" />
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {order.status === 'recycled' && (!order.images || order.images.length === 0) && (
+          <View className={styles.photoSection}>
+            <Text className={styles.photoTitle}>核验照片</Text>
+            <View className={styles.noPhoto}>
+              <Text>⚠️ 该订单缺少核验照片</Text>
+            </View>
+          </View>
+        )}
 
         {order.collectorName && (
           <View className={styles.infoRow} style={{ marginTop: '24rpx', paddingTop: '24rpx', borderTop: '1rpx solid #f3f4f6' }}>

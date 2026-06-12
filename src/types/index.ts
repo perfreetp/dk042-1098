@@ -42,6 +42,9 @@ export interface Order {
   rejectReason?: string;
   images?: string[];
   collectorName?: string;
+  className?: string;
+  handoverNo?: string;
+  bonusRate?: number;
 }
 
 export interface BatchItem {
@@ -76,6 +79,8 @@ export interface UserInfo {
   className?: string;
   role: 'student' | 'monitor' | 'collector';
   balance: number;
+  frozenBalance?: number;
+  totalEarning?: number;
   avatar?: string;
 }
 

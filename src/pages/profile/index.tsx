@@ -79,6 +79,15 @@ const ProfilePage: React.FC = () => {
           <View className={styles.balanceInfo}>
             <Text className={styles.balanceLabel}>账户余额</Text>
             <Text className={styles.balanceValue}>¥{formatMoney(user.balance)}</Text>
+            {user.frozenBalance && user.frozenBalance > 0 && (
+              <View className={styles.frozenInfo}>
+                <Text className={styles.frozenText}>冻结中：¥{formatMoney(user.frozenBalance)}</Text>
+              </View>
+            )}
+            <View className={styles.earningRow}>
+              <Text className={styles.earningLabel}>累计总收入</Text>
+              <Text className={styles.earningValue}>¥{formatMoney(user.totalEarning || 0)}</Text>
+            </View>
           </View>
           <View className={styles.balanceActions}>
             <View className={`${styles.actionBtn} ${styles.primaryBtn}`} onClick={handleWithdraw}>
@@ -100,7 +109,7 @@ const ProfilePage: React.FC = () => {
           </View>
           <View className={styles.statItem}>
             <Text className={styles.statValue}>¥{formatMoney(stats.totalEarning)}</Text>
-            <Text className={styles.statLabel}>累计收入</Text>
+            <Text className={styles.statLabel}>已完成收入</Text>
           </View>
         </View>
       </View>
