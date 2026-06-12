@@ -1,0 +1,29 @@
+@use '@/styles/variables.scss' as *;
+
+.priceTag {
+  display: inline-flex;
+  align-items: baseline;
+  color: $color-price;
+  font-weight: $font-weight-bold;
+}
+
+.prefix {
+  font-size: inherit;
+  margin-right: 2rpx;
+}
+
+.price {
+  font-size: inherit;
+}
+
+.small {
+  font-size: $font-size-md;
+}
+
+.medium {
+  font-size: $font-size-xl;
+}
+
+.large {
+  font-size: 48rpx;
+}
